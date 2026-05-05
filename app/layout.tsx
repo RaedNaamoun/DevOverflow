@@ -2,8 +2,11 @@ import type { Metadata } from "next";
 import { Inter, Space_Grotesk, Geist } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import Navbar from "@/components/navigation/navbar";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { Toaster } from "sonner";
+import { SessionProvider } from "next-auth/react";
+import { auth } from "@/auth";
+import { ReactNode } from "react";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -26,23 +29,28 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+const RootLayout = async ({
   children,
 }: Readonly<{
-  children: React.ReactNode;
-}>) {
+  children: ReactNode;
+}>) => {
+  const session = await auth();
   return (
     <html
       lang="en"
       suppressHydrationWarning
       className={cn("h-full", "antialiased", inter.className, SpaceGrotesk.variable, "font-sans", geist.variable)}
     >
+      <SessionProvider session={session}>
       <body className="flex min-h-full flex-col">
         <ThemeProvider attribute="class" defaultTheme="systeme" enableSystem disableTransitionOnChange>
-          <Navbar />
           {children}
         </ThemeProvider>
+        <Toaster />
       </body>
+      </SessionProvider>
     </html>
   );
 }
+
+export default RootLayout;
