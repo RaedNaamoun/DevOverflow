@@ -41,16 +41,23 @@ const RootLayout = async ({
       suppressHydrationWarning
       className={cn("h-full", "antialiased", inter.className, SpaceGrotesk.variable, "font-sans", geist.variable)}
     >
+      <head>
+        <link
+          rel="stylesheet"
+          type="text/css"
+          href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css"
+        />
+      </head>
       <SessionProvider session={session}>
-      <body className="flex min-h-full flex-col">
-        <ThemeProvider attribute="class" defaultTheme="systeme" enableSystem disableTransitionOnChange>
-          {children}
-        </ThemeProvider>
-        <Toaster />
-      </body>
+        <body className="flex min-h-full flex-col">
+          <ThemeProvider attribute="class" defaultTheme="systeme" enableSystem disableTransitionOnChange>
+            {children}
+          </ThemeProvider>
+          <Toaster />
+        </body>
       </SessionProvider>
     </html>
   );
-}
+};
 
 export default RootLayout;
