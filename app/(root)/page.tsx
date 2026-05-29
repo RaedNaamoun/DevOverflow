@@ -6,7 +6,7 @@ import LocalSearch from "@/components/search/LocalSearch";
 import { Button } from "@/components/ui/button";
 import ROUTES from "@/constants/routes";
 import handleError from "@/lib/handlers/error";
-import { ValidationError } from "@/lib/http-errors";
+import { api } from "@/lib/api";
 
 const questions = [
   {
@@ -51,10 +51,7 @@ const questions = [
 
 const test = async () => {
   try {
-    throw new ValidationError({
-      title: ["Required"],
-      tags: ['"JavaScript" is not a valid tag.'],
-    });
+    return await api.users.getAll();
   } catch (error) {
     return handleError(error);
   }
@@ -65,17 +62,14 @@ interface SearchParams {
 }
 
 const Home = async ({ searchParams }: SearchParams) => {
-  await test();
+  const users = await test();
+  console.log(users);
 
   const { query = "", filter = "" } = await searchParams;
 
   const filteredQuestions = questions.filter((question) => {
-    const matchesQuery = question.title
-      .toLowerCase()
-      .includes(query.toLowerCase());
-    const matchesFilter = filter
-      ? question.tags[0].name.toLowerCase() === filter.toLowerCase()
-      : true;
+    const matchesQuery = question.title.toLowerCase().includes(query.toLowerCase());
+    const matchesFilter = filter ? question.tags[0].name.toLowerCase() === filter.toLowerCase() : true;
     return matchesQuery && matchesFilter;
   });
 
@@ -84,20 +78,12 @@ const Home = async ({ searchParams }: SearchParams) => {
       <section className="flex w-full flex-col-reverse justify-between gap-4 sm:flex-row sm:items-center">
         <h1 className="h1-bold text-dark100_light900">All Questions</h1>
 
-        <Button
-          className="primary-gradient min-h-[46px] px-4 py-3 !text-light-900"
-          
-        >
+        <Button className="primary-gradient !text-light-900 min-h-[46px] px-4 py-3">
           <Link href={ROUTES.ASK_QUESTION}>Ask a Question</Link>
         </Button>
       </section>
       <section className="mt-11">
-        <LocalSearch
-          route="/"
-          imgSrc="/icons/search.svg"
-          placeholder="Search questions..."
-          otherClasses="flex-1"
-        />
+        <LocalSearch route="/" imgSrc="/icons/search.svg" placeholder="Search questions..." otherClasses="flex-1" />
       </section>
       <HomeFilter />
       <div className="mt-10 flex w-full flex-col gap-6">
