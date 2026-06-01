@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import React from "react";
 
 import { SheetClose } from "@/components/ui/sheet";
 import { sidebarLinks } from "@/constants";
@@ -14,17 +15,17 @@ const NavLinks = ({ isMobileNav = false, userId }: { isMobileNav?: boolean; user
   return (
     <>
       {sidebarLinks.map((item) => {
-        const href = item.route === "/profile" ? (userId ? `${item.route}/${userId}` : null) : item.route;
+        const isActive = (pathname.includes(item.route) && item.route.length > 1) || pathname === item.route;
 
-        if (!href) return null;
-
-        const isActive = (pathname.includes(href) && href.length > 1) || pathname === href;
+        if (item.route === "/profile") {
+          if (userId) item.route = `${item.route}/${userId}`;
+          else return null;
+        }
 
         const LinkComponent = (
           <Link
-            href={href}
-            key={href}
-            role={isMobileNav ? "link" : undefined}
+            href={item.route}
+            key={item.label}
             className={cn(
               isActive ? "primary-gradient text-light-900 rounded-lg" : "text-dark300_light900",
               "flex items-center justify-start gap-4 bg-transparent p-4"
@@ -41,7 +42,11 @@ const NavLinks = ({ isMobileNav = false, userId }: { isMobileNav?: boolean; user
           </Link>
         );
 
-        return isMobileNav ? <SheetClose key={href} nativeButton={false} render={LinkComponent} /> : LinkComponent;
+        return isMobileNav ? (
+          <SheetClose key={item.route}>{LinkComponent}</SheetClose>
+        ) : (
+          <React.Fragment key={item.route}>{LinkComponent}</React.Fragment>
+        );
       })}
     </>
   );
