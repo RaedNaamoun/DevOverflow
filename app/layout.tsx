@@ -50,7 +50,7 @@ const RootLayout = async ({
       </head>
       <SessionProvider session={session}>
         <body className="flex min-h-full flex-col">
-          <ThemeProvider attribute="class" defaultTheme="systeme" enableSystem disableTransitionOnChange>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
             {children}
           </ThemeProvider>
           <Toaster />
