@@ -1,6 +1,6 @@
 "use server";
 
-import mongoose from "mongoose";
+import mongoose, { QueryFilter } from "mongoose";
 
 import Question, { IQuestionDoc } from "@/database/question.model";
 import TagQuestion from "@/database/tag-question.model";
@@ -8,16 +8,9 @@ import Tag, { ITagDoc } from "@/database/tag.model";
 
 import action from "../handlers/action";
 import handleError from "../handlers/error";
-import {
-  AskQuestionSchema,
-  EditQuestionSchema,
-  GetQuestionSchema,
-  PaginatedSearchParamsSchema,
-} from "../validations";
+import { AskQuestionSchema, EditQuestionSchema, GetQuestionSchema, PaginatedSearchParamsSchema } from "../validations";
 
-export async function createQuestion(
-  params: CreateQuestionParams
-): Promise<ActionResponse<Question>> {
+export async function createQuestion(params: CreateQuestionParams): Promise<ActionResponse<Question>> {
   const validationResult = await action({
     params,
     schema: AskQuestionSchema,
@@ -35,10 +28,7 @@ export async function createQuestion(
   session.startTransaction();
 
   try {
-    const [question] = await Question.create(
-      [{ title, content, author: userId }],
-      { session }
-    );
+    const [question] = await Question.create([{ title, content, author: userId }], { session });
 
     if (!question) {
       throw new Error("Failed to create question");
@@ -63,11 +53,7 @@ export async function createQuestion(
 
     await TagQuestion.insertMany(tagQuestionDocuments, { session });
 
-    await Question.findByIdAndUpdate(
-      question._id,
-      { $push: { tags: { $each: tagIds } } },
-      { session }
-    );
+    await Question.findByIdAndUpdate(question._id, { $push: { tags: { $each: tagIds } } }, { session });
 
     await session.commitTransaction();
 
@@ -80,9 +66,7 @@ export async function createQuestion(
   }
 }
 
-export async function editQuestion(
-  params: EditQuestionParams
-): Promise<ActionResponse<IQuestionDoc>> {
+export async function editQuestion(params: EditQuestionParams): Promise<ActionResponse<IQuestionDoc>> {
   const validationResult = await action({
     params,
     schema: EditQuestionSchema,
@@ -117,15 +101,10 @@ export async function editQuestion(
     }
 
     const tagsToAdd = tags.filter(
-      (tag) =>
-        !question.tags.some((t: ITagDoc) =>
-          t.name.toLowerCase().includes(tag.toLowerCase())
-        )
+      (tag) => !question.tags.some((t: ITagDoc) => t.name.toLowerCase().includes(tag.toLowerCase()))
     );
-
     const tagsToRemove = question.tags.filter(
-      (tag: ITagDoc) =>
-        !tags.some((t) => t.toLowerCase() === tag.name.toLowerCase())
+      (tag: ITagDoc) => !tags.some((t) => t.toLowerCase() === tag.name.toLowerCase())
     );
 
     const newTagDocuments = [];
@@ -152,22 +131,12 @@ export async function editQuestion(
     if (tagsToRemove.length > 0) {
       const tagIdsToRemove = tagsToRemove.map((tag: ITagDoc) => tag._id);
 
-      await Tag.updateMany(
-        { _id: { $in: tagIdsToRemove } },
-        { $inc: { questions: -1 } },
-        { session }
-      );
+      await Tag.updateMany({ _id: { $in: tagIdsToRemove } }, { $inc: { questions: -1 } }, { session });
 
-      await TagQuestion.deleteMany(
-        { tag: { $in: tagIdsToRemove }, question: questionId },
-        { session }
-      );
+      await TagQuestion.deleteMany({ tag: { $in: tagIdsToRemove }, question: questionId }, { session });
 
       question.tags = question.tags.filter(
-        (tag: mongoose.Types.ObjectId) =>
-          !tagIdsToRemove.some((id: mongoose.Types.ObjectId) =>
-            id.equals(tag._id)
-          )
+        (tag: mongoose.Types.ObjectId) => !tagIdsToRemove.some((id: mongoose.Types.ObjectId) => id.equals(tag._id))
       );
     }
 
@@ -187,9 +156,7 @@ export async function editQuestion(
   }
 }
 
-export async function getQuestion(
-  params: GetQuestionParams
-): Promise<ActionResponse<Question>> {
+export async function getQuestion(params: GetQuestionParams): Promise<ActionResponse<Question>> {
   const validationResult = await action({
     params,
     schema: GetQuestionSchema,
@@ -203,7 +170,7 @@ export async function getQuestion(
   const { questionId } = validationResult.params!;
 
   try {
-    const question = await Question.findById(questionId).populate("tags");
+    const question = await Question.findById(questionId).populate("tags").populate("author", "_id name image");
 
     if (!question) {
       throw new Error("Question not found");
@@ -231,17 +198,14 @@ export async function getQuestions(
   const skip = (Number(page) - 1) * pageSize;
   const limit = Number(pageSize);
 
-  const filterQuery: mongoose.QueryFilter<IQuestionDoc> = {};
+  const filterQuery: QueryFilter<typeof Question> = {};
 
   if (filter === "recommended") {
     return { success: true, data: { questions: [], isNext: false } };
   }
 
   if (query) {
-    filterQuery.$or = [
-      { title: { $regex: new RegExp(query, "i") } },
-      { content: { $regex: new RegExp(query, "i") } },
-    ];
+    filterQuery.$or = [{ title: { $regex: new RegExp(query, "i") } }, { content: { $regex: new RegExp(query, "i") } }];
   }
 
   let sortCriteria = {};
