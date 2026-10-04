@@ -1,10 +1,7 @@
 import { z } from "zod";
 
 export const SignInSchema = z.object({
-  email: z
-    .string()
-    .min(1, { message: "Email is required" })
-    .email({ message: "Please provide a valid email address." }),
+  email: z.email({ message: "Please provide a valid email address." }).min(1, { message: "Email is required" }),
 
   password: z
     .string()
@@ -29,10 +26,7 @@ export const SignUpSchema = z.object({
       message: "Name can only contain letters and spaces.",
     }),
 
-  email: z
-    .string()
-    .min(1, { message: "Email is required." })
-    .email({ message: "Please provide a valid email address." }),
+  email: z.email({ message: "Please provide a valid email address." }).min(1, { message: "Email is required." }),
 
   password: z
     .string()
@@ -70,14 +64,14 @@ export const UserSchema = z.object({
   bio: z.string().optional(),
   image: z.url({ message: "Please provide a valid URL." }).optional(),
   location: z.string().optional(),
-  portfolio: z.string().url({ message: "Please provide a valid URL." }).optional(),
+  portfolio: z.url({ message: "Please provide a valid URL." }).optional(),
   reputation: z.number().optional(),
 });
 
 export const AccountSchema = z.object({
   userId: z.string().min(1, { message: "User ID is required." }),
   name: z.string().min(1, { message: "Name is required." }),
-  image: z.string().url({ message: "Please provide a valid URL." }).optional(),
+  image: z.url({ message: "Please provide a valid URL." }).optional(),
   password: z
     .string()
     .min(6, { message: "Password must be at least 6 characters long." })
@@ -122,4 +116,8 @@ export const PaginatedSearchParamsSchema = z.object({
   query: z.string().optional(),
   filter: z.string().optional(),
   sort: z.string().optional(),
+});
+
+export const GetTagQuestionsSchema = PaginatedSearchParamsSchema.extend({
+  tagId: z.string().min(1, { message: "Tag ID is required." }),
 });
