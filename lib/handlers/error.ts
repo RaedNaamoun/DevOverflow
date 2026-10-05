@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { ZodError } from "zod";
+import { z, ZodError } from "zod";
 
 import { RequestError, ValidationError } from "../http-errors";
 import logger from "../logger";
@@ -20,41 +20,20 @@ const formatResponse = (
     },
   };
 
-  return responseType === "api"
-    ? NextResponse.json(responseContent, { status })
-    : { status, ...responseContent };
+  return responseType === "api" ? NextResponse.json(responseContent, { status }) : { status, ...responseContent };
 };
 
 const handleError = (error: unknown, responseType: ResponseType = "server") => {
   if (error instanceof RequestError) {
-    logger.error(
-      { err: error },
-      `${responseType.toUpperCase()} Error: ${error.message}`
-    );
+    logger.error({ err: error }, `${responseType.toUpperCase()} Error: ${error.message}`);
 
-    return formatResponse(
-      responseType,
-      error.statusCode,
-      error.message,
-      error.errors
-    );
+    return formatResponse(responseType, error.statusCode, error.message, error.errors);
   }
 
   if (error instanceof ZodError) {
-    const fieldErrors: Record<string, string[]> = {};
-    error.issues.forEach((issue) => {
-      const path = issue.path.join(".");
-      if (!fieldErrors[path]) {
-        fieldErrors[path] = [];
-      }
-      fieldErrors[path].push(issue.message);
-    });
-    const validationError = new ValidationError(fieldErrors);
+    const validationError = new ValidationError(z.flattenError(error).fieldErrors as Record<string, string[]>);
 
-    logger.error(
-      { err: error },
-      `Validation Error: ${validationError.message}`
-    );
+    logger.error({ err: error }, `Validation Error: ${validationError.message}`);
 
     return formatResponse(responseType, validationError.statusCode, validationError.message, validationError.errors);
   }
