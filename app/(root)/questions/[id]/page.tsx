@@ -18,8 +18,9 @@ import { formatNumber, getTimeStamp } from "@/lib/utils";
 import Votes from "@/components/votes/votes";
 import AnswerForm from "@/components/Forms/AnswerForm";
 
-const QuestionDetails = async ({ params }: RouteParams) => {
+const QuestionDetails = async ({ params, searchParams }: RouteParams) => {
   const { id } = await params;
+  const { page, pageSize, filter } = await searchParams;
   const { success, data: question } = await getQuestion({ questionId: id });
 
   after(async () => {
@@ -34,9 +35,9 @@ const QuestionDetails = async ({ params }: RouteParams) => {
     error: answersError,
   } = await getAnswers({
     questionId: id,
-    page: 1,
-    pageSize: 10,
-    filter: "latest",
+    page: Number(page) || 1,
+    pageSize: Number(pageSize) || 10,
+    filter,
   });
 
   const hasVotedPromise = hasVoted({
@@ -61,7 +62,7 @@ const QuestionDetails = async ({ params }: RouteParams) => {
             </Link>
           </div>
 
-          <div className="gap-4 flex items-center justify-end">
+          <div className="gpa-4 flex items-center justify-end">
             <Suspense fallback={<div>Loading...</div>}>
               <Votes
                 targetType="question"
