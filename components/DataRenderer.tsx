@@ -1,9 +1,5 @@
 import { DEFAULT_EMPTY, DEFAULT_ERROR } from "@/constants/states";
-import Image, { type StaticImageData } from "next/image";
-import darkError from "@/public/images/dark-error.png";
-import lightError from "@/public/images/light-error.png";
-import darkIllustration from "@/public/images/dark-illustration.png";
-import lightIllustration from "@/public/images/light-illustration.png";
+import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { Button } from "./ui/button";
@@ -28,8 +24,8 @@ interface Props<T> {
 
 interface StateSkeletonProps {
   image: {
-    light: StaticImageData;
-    dark: StaticImageData;
+    light: string;
+    dark: string;
     alt: string;
   };
   title: string;
@@ -42,20 +38,10 @@ interface StateSkeletonProps {
 
 const StateSkeleton = ({ image, title, message, button }: StateSkeletonProps) => (
   <div className="mt-16 flex w-full flex-col items-center justify-center sm:mt-36">
-    <Image
-      src={image.dark}
-      alt={image.alt}
-      sizes="270px"
-      style={{ width: 270, maxWidth: "100%", height: "auto" }}
-      className="hidden object-contain dark:block"
-    />
-    <Image
-      src={image.light}
-      alt={image.alt}
-      sizes="270px"
-      style={{ width: 270, maxWidth: "100%", height: "auto" }}
-      className="block object-contain dark:hidden"
-    />
+    <>
+      <Image src={image.dark} alt={image.alt} width={270} height={200} className="hidden object-contain dark:block" />
+      <Image src={image.light} alt={image.alt} width={270} height={200} className="block object-contain dark:hidden" />
+    </>
 
     <h2 className="h2-bold text-dark200_light900 mt-8">{title}</h2>
     <p className="body-regular text-dark500_light700 my-3.5 max-w-md text-center">{message}</p>
@@ -74,8 +60,8 @@ const DataRenderer = <T,>({ success, error, data, empty = DEFAULT_EMPTY, render 
     return (
       <StateSkeleton
         image={{
-          light: lightError,
-          dark: darkError,
+          light: "/images/light-error.png",
+          dark: "/images/dark-error.png",
           alt: "Error state illustration",
         }}
         title={error?.message || DEFAULT_ERROR.title}
@@ -89,8 +75,8 @@ const DataRenderer = <T,>({ success, error, data, empty = DEFAULT_EMPTY, render 
     return (
       <StateSkeleton
         image={{
-          light: lightIllustration,
-          dark: darkIllustration,
+          light: "/images/light-illustration.png",
+          dark: "/images/dark-illustration.png",
           alt: "Empty state illustration",
         }}
         title={empty.title}
