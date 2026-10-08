@@ -7,25 +7,41 @@ import { cn, getTimeStamp } from "@/lib/utils";
 
 import { Preview } from "../editor/Preview";
 import UserAvatar from "../UserAvatar";
+import EditDeleteAction from "../user/EditDeleteAction";
 import Votes from "../votes/votes";
 
 interface Props extends Answer {
   containerClasses?: string;
   showReadMore?: boolean;
+  showActionBtns?: boolean;
 }
 
 
-const AnswerCard = ({ _id, author, content, createdAt, upvotes, downvotes, question,
+const AnswerCard = ({
+  _id,
+  author,
+  content,
+  createdAt,
+  upvotes,
+  downvotes,
+  question,
   containerClasses,
   showReadMore = false,
+  showActionBtns = false,
 }: Props) => {
   const hasVotedPromise = hasVoted({
     targetId: _id,
     targetType: "answer",
   });
   return (
-    <article className={cn("light-border border-b py-10", containerClasses)}>
+    <article className={cn("light-border relative border-b py-10", containerClasses)}>
       <span id={`answer-${_id}`} className="hash-span" />
+
+      {showActionBtns && (
+        <div className="background-light800 flex-center absolute -top-5 -right-2 size-9 rounded-full">
+          <EditDeleteAction type="Answer" itemId={_id} />
+        </div>
+      )}
 
       <div className="mb-5 flex flex-col-reverse justify-between gap-5 sm:flex-row sm:items-center sm:gap-2">
         <div className="flex flex-1 items-start gap-1 sm:items-center">
@@ -64,7 +80,7 @@ const AnswerCard = ({ _id, author, content, createdAt, upvotes, downvotes, quest
       {showReadMore && (
         <Link
           href={`/questions/${question}#answer-${_id}`}
-          className="body-semibold relative z-10 font-space-grotesk text-primary-500"
+          className="body-semibold font-space-grotesk text-primary-500 relative z-10"
         >
           <p className="mt-1">Read more...</p>
         </Link>
