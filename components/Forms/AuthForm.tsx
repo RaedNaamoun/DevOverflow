@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { DefaultValues, FieldValues, Path, SubmitHandler, useForm } from "react-hook-form";
-import { z, ZodType } from "zod";
+import { ZodType } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -13,8 +13,8 @@ import { toast } from "sonner";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 
 interface AuthFormProps<T extends FieldValues> {
-  schema: ZodType<T>;
-  defaultValues: T;
+  schema: ZodType<T, T>;
+  defaultValues: DefaultValues<T>;
   onSubmit: (data: T) => Promise<ActionResponse>;
   formType: "SIGN_IN" | "SIGN_UP";
 }
@@ -22,9 +22,9 @@ interface AuthFormProps<T extends FieldValues> {
 const AuthForm = <T extends FieldValues>({ schema, defaultValues, formType, onSubmit }: AuthFormProps<T>) => {
   const router = useRouter();
 
-  const form = useForm<z.infer<typeof schema>>({
+  const form = useForm<T, undefined, T>({
     resolver: standardSchemaResolver(schema),
-    defaultValues: defaultValues as DefaultValues<T>,
+    defaultValues,
   });
 
   const handleSubmit: SubmitHandler<T> = async (data) => {
