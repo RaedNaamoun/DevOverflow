@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { InteractionActionEnums } from "@/constants/interaction";
+import { InteractionActionEnums } from "@/constants";
 
 export const SignInSchema = z.object({
   email: z

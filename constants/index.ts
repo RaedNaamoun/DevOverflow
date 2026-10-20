@@ -1,3 +1,14 @@
+export const InteractionActionEnums = [
+  "view",
+  "upvote",
+  "downvote",
+  "bookmark",
+  "post",
+  "edit",
+  "delete",
+  "search",
+] as const;
+
 export const themes = [
   { value: "light", label: "Light", icon: "/icons/sun.svg" },
   { value: "dark", label: "Dark", icon: "/icons/moon.svg" },
